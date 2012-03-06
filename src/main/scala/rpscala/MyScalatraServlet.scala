@@ -17,7 +17,20 @@ class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
 
   // 最もシンプルな例は get(path), post(path), put(path), delete(path) のように
   // HTTP メソッドとパス指定を記述する
+
+  // ScalatraKernel に以下のような implicit conversion が存在しているので
+  // implicit def string2RouteMatcher(path: String): RouteMatcher = new SinatraRouteMatcher(path, requestPath)
+  // このクラスのインスタンス生成時に
+  // def get(routeMatchers: RouteMatcher*)(action: => Any) = addRoute(Get, routeMatchers, action)
+  // の呼び出しが行われる
   get("/") {
+
+    // request や response は ScalatraKernel に定義されているので直接触れる
+    request.getCookies.foreach {
+      cookie =>
+        println(cookie.getName + ":" + cookie.getValue)
+    }
+    response.addHeader("X-Content-Type-Options", "nosniff")
 
     // ここのブロックは名前渡しになっていて action と呼ばれている
     // action は Any 型を渡せばよいので String や Array[Byte] などを渡す
@@ -25,13 +38,26 @@ class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
     // ScalateSupport にあるメソッドで簡単に Scalate を使える
     // これらのメソッドは String 型を返してそれがそのままボディになる
     // layoutTemplate("index.ssp", ("message" -> "Hello Scalatra!"))
-    ssp("index.ssp", 
+    ssp("index.ssp",
       ("message" -> "Hello Scalatra!"),
       ("tosee" -> "ScalatraServlet -> ScalatraKernel, CoreDsl"),
       ("official" -> "http://www.scalatra.org/"),
       ("github" -> "https://github.com/scalatra/scalatra")
     )
   }
+
+  // HaltException という例外を throw するとそこで処理を中断して
+  // 指定された HTTP ステータスでレスポンスする
+  get("/halt") {
+
+    val required = params.get("required").getOrElse {
+      // HaltException を throw して処理を中断
+      halt(400, "required パラメータは必須です。")
+    }
+
+    "必須項目が渡されました。 (" + required + ")"
+  }
+
 
   get("/foo") {
     "末尾のスラッシュ有無は区別されます"
@@ -93,29 +119,30 @@ class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
   get("/dup") {
     // 無視される
   }
-  get("/dup") { 
+  get("/dup") {
     // GET /dup では必ずここに来る
   }
 
   // 実装依存の話になるが2.0.3 現在
   // 最後に ScalatraKernel#addRoute された route から順に判定されるので注意
-  get("/3番目にマッチする") { }
-  get("/次にマッチする") { }
-  get("/最初にマッチする") { }
+  get("/3番目にマッチする") {}
+  get("/次にマッチする") {}
+  get("/最初にマッチする") {}
 
   // マッチする route がなかったらここへ来る
   notFound {
     // マッチする route がなくてwebapp/WEB-INF/views/{route}.ssp
     // のようなテンプレートが置いてあったらそれを表示する
     // 例： GET /hello-scalate
-    findTemplate(requestPath) map { path =>
-      contentType = "text/html"
-      layoutTemplate(path)
+    findTemplate(requestPath) map {
+      path =>
+        contentType = "text/html"
+        layoutTemplate(path)
     } orElse serveStaticResource() getOrElse resourceNotFound() // デフォルト実装が呼ばれているがカスタマイズ可能
   }
 
   override protected def resourceNotFound(): Any = {
-    response.getWriter println "これはデフォルトで定義されている resourceNotFound() による出力です<br/><br/>" 
+    response.getWriter println "これはデフォルトで定義されている resourceNotFound() による出力です<br/><br/>"
     super.resourceNotFound()
   }
 
