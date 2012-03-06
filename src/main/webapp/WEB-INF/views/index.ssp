@@ -50,4 +50,5 @@ RegExp <a href="/rpscala/72xxxxx">/rpscala/72xxxx</a><br/>
 Filter <a href="/hasvalue">/hasvalue</a><br/>
 Filter <a href="/hasvalue?value=foo">/hasvalue?value=foo</a><br/>
 <br/>
+<a href="/hello-scalate">hello-scalate.scaml を findTemplate で表示<br/>
 <br/>

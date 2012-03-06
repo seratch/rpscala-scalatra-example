@@ -107,6 +107,7 @@ class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
   notFound {
     // マッチする route がなくてwebapp/WEB-INF/views/{route}.ssp
     // のようなテンプレートが置いてあったらそれを表示する
+    // 例： GET /hello-scalate
     findTemplate(requestPath) map { path =>
       contentType = "text/html"
       layoutTemplate(path)
