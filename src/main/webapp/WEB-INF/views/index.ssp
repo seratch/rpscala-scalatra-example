@@ -1,0 +1,53 @@
+<% attributes("title") = "Hello Scalatra!" %>
+<% attributes("headline") = "#rpscala 72 で Scalatra!" %> 
+
+<!-- 
+  ScalatraServlet から ssp に渡されるキー名の変数を必ず定義しないといけない 
+  これは Scalate 側（ssp）の仕様
+-->
+<%@ val message: String = "" %>
+<%@ val official: String = "" %>
+<%@ val github: String = "" %>
+<%@ val tosee: String = "" %>
+
+MyScalatraServlet から渡された「message」-> <%= message %><br/>
+<br/>
+[ソースコードリーディング]<br/>
+<br/>
+まず見るべきソースコード: <%= tosee %><br/>
+Servlet API をある程度知っている人ならすぐに読める内容と分量。<br/>
+<br/>
+<a href="https://github.com/scalatra/scalatra/tree/master/core/src/main/scala/org/scalatra">https://github.com/scalatra/scalatra/tree/master/core/src/main/scala/org/scalatra</a><br/>
+<a href="http://d.hatena.ne.jp/seratch2/20120219/1329641786">Scalatra 2.0.3 ソースコードリーディング</a><br/>
+<br/>
+拡張（***Support）の書き方は特に制限や規約もなく何でもありな印象。<br/>
+ScalatraKernel を継承するか、ScalatraKernel を self-type にとるか、ただの trait を定義するかのいずれか？<br/>
+<br/>
+<a href="<%= official %>">Official</a><br/>
+<a href="<%= github %>">GitHub</a><br/>
+<br/>
+<a href="/foo">/foo</a><br/>
+<a href="/foo/">/foo/</a><br/>
+<a href="/bar">/bar</a><br/>
+<a href="/bar/">/bar/</a><br/>
+<br/>
+GET <a href="/params/get?value=foo">/params/get?value=foo</a><br/>
+<br/>
+<form action="/params/post" method="post">
+POST value:<input type="text" name="value" value="foo" />
+<input type="submit" />
+</form>
+<br/>
+URL <a href="/params/url/foo">/params/url/foo</a><br/>
+<br/>
+RegExp <a href="/rpscala_72">/rpscala_72</a><br/>
+RegExp <a href="/rpscala_72xxxxx">/rpscala_72xxxx</a><br/>
+<br/>
+RegExp <a href="/rpscala/72">/rpscala/72</a><br/>
+RegExp <a href="/rpscala/72/">/rpscala/72/</a><br/>
+RegExp <a href="/rpscala/72xxxxx">/rpscala/72xxxx</a><br/>
+<br/>
+Filter <a href="/hasvalue">/hasvalue</a><br/>
+Filter <a href="/hasvalue?value=foo">/hasvalue?value=foo</a><br/>
+<br/>
+<br/>
