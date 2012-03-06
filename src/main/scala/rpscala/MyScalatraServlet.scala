@@ -8,10 +8,12 @@ import scalate.ScalateSupport
  */
 class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
 
-  // content-type は勝手に設定されないので
-  // それぞれのaction の中で適宜指定するか
-  // このように一括で指定する
+  // before() {} や after() {} で action の前後をフックできる
+  // () をつけわすれると動かないので注意
   before() {
+    // content-type は勝手に設定されないので
+    // それぞれのaction の中で適宜指定するか
+    // このように一括で指定する
     contentType = "text/html; charset=utf-8"
   }
 
