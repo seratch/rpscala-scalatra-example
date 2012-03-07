@@ -31,8 +31,12 @@ ScalatraKernel を継承するか、ScalatraKernel を self-type にとるか、
 <a href="/bar">/bar</a><br/>
 <a href="/bar/">/bar/</a><br/>
 <br/>
+<a href="/google?q=Scalatra">/google?q=Scalatra</a><br/>
+<br/>
 <a href="/halt">/halt</a><br/>
 <a href="/halt?required=true">/halt?required=true</a><br/>
+<br/>
+<a href="/ScalatraServlet">/ScalatraServlet</a><br/>
 <br/>
 GET <a href="/params/get?value=foo">/params/get?value=foo</a><br/>
 <br/>
@@ -42,6 +46,8 @@ POST value:<input type="text" name="value" value="foo" />
 </form>
 <br/>
 URL <a href="/params/url/foo">/params/url/foo</a><br/>
+URL <a href="/params/url/wildcard/foo">/params/url/wildcard/foo</a><br/>
+URL <a href="/multiparams/url/foo/bar">/multiparams/url/foo/bar</a><br/>
 <br/>
 RegExp <a href="/rpscala_72">/rpscala_72</a><br/>
 RegExp <a href="/rpscala_72xxxxx">/rpscala_72xxxx</a><br/>

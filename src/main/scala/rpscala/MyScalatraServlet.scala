@@ -5,10 +5,12 @@ import scalate.ScalateSupport
 
 /**
  * #rpscala 72 でのプレゼンテーション表示用に作ったサンプルです
+ *
+ * @see http://www.scalatra.org/2.0/book/
  */
 class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
 
-  // before() {} や after() {} で action の前後をフックできる
+  // before() {} や after() {} で action の前後をフックするフィルターを追加する
   // () をつけわすれると動かないので注意
   before() {
     // content-type は勝手に設定されないので
@@ -17,8 +19,17 @@ class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
     contentType = "text/html; charset=utf-8"
   }
 
-  // 最もシンプルな例は get(path), post(path), put(path), delete(path) のように
-  // HTTP メソッドとパス指定を記述する
+  // パスを絞ってフィルターする
+  // String 型での * はワイルドカード
+  before("/admin/*") {
+    halt(401, "管理者権限が必要です。")
+  }
+  get("/admin/.*".r) {
+    "管理者なのでアクセスできました。"
+  }
+
+  // 最もシンプルな例は get(path), post(path), put(path), delete(path) のように HTTP メソッドとパス指定を記述する
+  // （PATCH メソッドもある！)
 
   // ScalatraKernel に以下のような implicit conversion が存在しているので
   // implicit def string2RouteMatcher(path: String): RouteMatcher = new SinatraRouteMatcher(path, requestPath)
@@ -27,39 +38,64 @@ class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
   // の呼び出しが行われる
   get("/") {
 
-    // request や response は ScalatraKernel に定義されているので直接触れる
-    request.getCookies.foreach {
-      cookie =>
-        println(cookie.getName + ":" + cookie.getValue)
-    }
-    response.addHeader("X-Content-Type-Options", "nosniff")
-
     // ここのブロックは名前渡しになっていて action と呼ばれている
     // action は Any 型を渡せばよいので String や Array[Byte] などを渡す
 
+    // request や response は Servlet API そのまま
+    // 使えるものは CoreDsl に定義されているものを参照
+    response.addHeader("X-Content-Type-Options", "nosniff")
+    request.getCookies.foreach {
+      cookie => println(cookie.getName + ":" + cookie.getValue)
+    } // CookieSupport を使えば cookies でアクセスできる
+
     // ScalateSupport にあるメソッドで簡単に Scalate を使える
     // これらのメソッドは String 型を返してそれがそのままボディになる
-    // layoutTemplate("index.ssp", ("message" -> "Hello Scalatra!"))
-    ssp("index.ssp",
-      ("message" -> "Hello Scalatra!"),
-      ("tosee" -> "ScalatraServlet -> ScalatraKernel, CoreDsl"),
-      ("official" -> "http://www.scalatra.org/"),
-      ("github" -> "https://github.com/scalatra/scalatra")
-    )
+
+    val attributes: Map[String, Any] = Map(
+      "message" -> "Hello Scalatra!",
+      "tosee" -> "ScalatraServlet -> ScalatraKernel, CoreDsl",
+      "official" -> "http://www.scalatra.org/",
+      "github" -> "https://github.com/scalatra/scalatra")
+    val body = templateEngine.layout("/WEB-INF/views/index.ssp", attributes)
+    println(body) // HTML をそのまま String 型として返しているだけ
+
+    // 同じことをもう少し簡潔に書けるメソッド
+    ssp("index.ssp", attributes.toSeq: _*)
   }
 
   // HaltException という例外を throw するとそこで処理を中断して
   // 指定された HTTP ステータスでレスポンスする
   get("/halt") {
-
     val required = params.get("required").getOrElse {
       // HaltException を throw して処理を中断
       halt(400, "required パラメータは必須です。")
     }
-
     "必須項目が渡されました。 (" + required + ")"
   }
 
+  // リダイレクトはメソッドが用意されている
+  get("/google") {
+    val q = params.get("q").getOrElse("")
+    status(301)
+    redirect("http://www.google.com/?q=" + q) // redirect(path) は 内部的に halt() する
+  }
+
+  // pass() を使うと一度 route にマッチして action が呼ばれた後で
+  // さらにマッチする route を探して処理する
+  get("/ScalatraServlet") {
+    println("matched GET \"/ScalatraServlet\"")
+    "pass() を使ったサンプルです"
+  }
+  get("/Scalatra.+$".r) {
+    println("matched GET \"/Scalatra.+$\".r")
+    response.addHeader("Scalatra", "called")
+    pass()
+  }
+  get("/Scala.+$".r) {
+    println("matched GET \"/Scala.+$\".r")
+    response.addHeader("Scala", "called")
+    pass()
+  }
 
   get("/foo") {
     "末尾のスラッシュ有無は区別されます"
@@ -90,6 +126,16 @@ class MyScalatraServlet extends ScalatraServlet with ScalateSupport {
     """URL 埋め込みパラメータは 
       |get("/params/url/:value") {...} の場合、
       |params("value") のようにして受け取ります""".stripMargin + " (" + value + ")"
+  }
+
+  get("/multiparams/url/*/*") {
+    val splat = multiParams.get("splat").getOrElse(Nil) // ListBuffer(foo, bar)
+    "multiParams.get(\"splat\") で取り出します。(" + splat + ")"
+  }
+
+  get("/params/url/wildcard/*") {
+    val splat = params.get("splat").getOrElse("")
+    "URL 中のワイルドカードから取り出す値は「splat」というキーに入っています (" + splat + ")"
   }
 
   // 正規表現を書ける

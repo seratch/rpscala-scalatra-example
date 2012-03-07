@@ -4,8 +4,6 @@ scalaVersion := "2.9.1"
 
 resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases"
 
-resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots"
-
 libraryDependencies ++= Seq(
   "org.scalatra" %% "scalatra" % "2.0.3",
   "org.scalatra" %% "scalatra-scalate" % "2.0.3",
